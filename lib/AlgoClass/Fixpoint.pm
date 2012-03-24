@@ -12,12 +12,12 @@ sub fixpoint {
 # idea: ($lower .. $upper) is a region which may contain a fixpoint.
     my $lower = 0;
     my $upper = $#_;
+    if ($lower == $_[$lower]) {
+        return $lower;
+    } elsif ($upper == $_[$upper]) {
+        return $upper;
+    }
     while ($lower < $upper - 1) {
-        if ($lower == $_[$lower]) {
-            return $lower;
-        } elsif ($upper == $_[$upper]) {
-            return $upper;
-        }
         my $middle = int(($lower + $upper)/2);
         if ($_[$middle] == $middle) {
             return $middle;
