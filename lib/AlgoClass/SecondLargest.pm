@@ -38,31 +38,40 @@ sub go {
 
 sub merge {
     my ($left, $right) = @_;
-    my @left_two  = @{$left->{top_two}};
-    my @right_two = @{$right->{top_two}};
-    my @top_two;
-    my $comparisons = $left->{comparisons} + $right->{comparisons};
-    while (@top_two < 2) {
-        if ($left_two[0] > $right_two[0]) {
-            push @top_two, shift(@left_two);
-        } else {
-            push @top_two, shift(@right_two);
-        }
-        $comparisons++;
+    my $left_top  = $left->{top};
+    my $right_top = $right->{top};
+    my $comparisons = $left->{comparisons} + $right->{comparisons} + 1;
+    my ($top, @losers);
+    if ($left_top < $right_top) {
+        $top = $right_top;
+        @losers = ($left_top, @{$right->{losers}});
+    } elsif ($left_top == $right_top) {
+        die "Array contains duplicate elements";
+    } else {
+        $top = $left_top;
+        @losers = ($right_top, @{$left->{losers}});
     }
-    return { top_two => [@top_two], comparisons => $comparisons };
+    return { top => $top, losers => [@losers], comparisons => $comparisons };
 }
 
 sub base_case {
-    my $top_two = $_[0] < $_[1] ? [$_[1], $_[0]] : [$_[0], $_[1]];
-    return { top_two => $top_two, comparisons => 1 }
+    if ($_[0] < $_[1]) {
+        return { top => $_[1], losers => [$_[0]], comparisons => 1 }
+    } else {
+        return { top => $_[0], losers => [$_[1]], comparisons => 1 }
+    }
 }
 
 # returns second largest element of @_, number of comparisons made.
 sub second_largest {
     my $result = go(@_);
-    return { value => $result->{top_two}[1],
-             comparisons => $result->{comparisons} };
+    my $second = shift @{$result->{losers}};
+    for my $loser (@{$result->{losers}}) {
+        if ($loser > $second) {
+            $second = $loser;
+        }
+    }
+    return { value => $second, comparisons => $result->{comparisons} };
 }
 
 sub naive_second_largest {
